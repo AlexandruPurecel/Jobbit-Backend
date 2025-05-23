@@ -7,10 +7,13 @@ import com.backend.jobbit.persistence.Conversation;
 import com.backend.jobbit.persistence.Message;
 import com.backend.jobbit.persistence.model.User;
 import com.backend.jobbit.repository.*;
+import com.backend.jobbit.service.notificationService.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -18,24 +21,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class MessageService {
 
     private final MessageRepository messageRepository;
     private final ConversationRepository conversationRepository;
     private final UserRepo userRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
 
-    @Autowired
-    public MessageService(MessageRepository messageRepository,
-                          ConversationRepository conversationRepository,
-                          UserRepo userRepository,
-                          SimpMessagingTemplate messagingTemplate) {
-        this.messageRepository = messageRepository;
-        this.conversationRepository = conversationRepository;
-        this.userRepository = userRepository;
-        this.messagingTemplate = messagingTemplate;
-    }
-
+    @Transactional
     public MessageDto sendMessage(Long senderId, Long recipientId, String content) {
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new EntityNotFoundException("Sender not found"));
@@ -43,7 +38,6 @@ public class MessageService {
         User recipient = userRepository.findById(recipientId)
                 .orElseThrow(() -> new EntityNotFoundException("Recipient not found"));
 
-        // Find or create conversation
         Conversation conversation = conversationRepository
                 .findByUser1_UserIdAndUser2_UserIdOrUser1_UserIdAndUser2_UserId(senderId, recipientId, recipientId, senderId)
                 .orElseGet(() -> {
@@ -54,7 +48,6 @@ public class MessageService {
                     return conversationRepository.save(newConversation);
                 });
 
-        // Create and save message
         Message message = new Message();
         message.setSender(sender);
         message.setRecipient(recipient);
@@ -62,13 +55,22 @@ public class MessageService {
         message.setTimestamp(LocalDateTime.now());
         message.setConversation(conversation);
 
-        // Update conversation last message time
         conversation.setLastMessageTime(message.getTimestamp());
         conversationRepository.save(conversation);
 
         Message savedMessage = messageRepository.save(message);
 
-        // Convert to DTO and send via WebSocket
+        String notificationContent = String.format("New message from %s %s",
+                sender.getFirstName(), sender.getLastName());
+
+        notificationService.createNotification(
+                recipientId,                    // Who gets the notification
+                "MESSAGE",                      // Type of notification
+                notificationContent,            // What the notification says
+                savedMessage.getId()            // Link to this message
+        );
+
+
         MessageDto messageDto = convertToDto(savedMessage);
         messagingTemplate.convertAndSendToUser(
                 recipient.getUserId().toString(),
@@ -122,7 +124,6 @@ public class MessageService {
         ConversationDto dto = new ConversationDto();
         dto.setId(conversation.getId());
 
-        // Convert users to DTOs
         UserDto user1Dto = new UserDto();
         user1Dto.setUserId(conversation.getUser1().getUserId());
         user1Dto.setFirstName(conversation.getUser1().getFirstName());
@@ -145,7 +146,7 @@ public class MessageService {
         dto.setUser2(user2Dto);
         dto.setLastMessageTime(conversation.getLastMessageTime());
 
-        // Get last message if available
+
         if (!conversation.getMessages().isEmpty()) {
             Message lastMessage = conversation.getMessages().stream()
                     .max(Comparator.comparing(Message::getTimestamp))
