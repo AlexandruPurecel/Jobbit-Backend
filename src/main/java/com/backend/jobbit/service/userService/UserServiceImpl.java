@@ -32,6 +32,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JobRepo jobRepo;
     private final RoleRepo roleRepo;
+    private final ReviewRepository reviewRepository;
 
     @Override
     public UserDto createUser(UserRegisterDto userRegisterDto) {
@@ -174,6 +175,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto convertToDto(User user) {
 
+        Double averageRating = reviewRepository.findAverageRatingByUserId(user.getUserId());
+        Long totalReviews = reviewRepository.countReviewsByUserId(user.getUserId());
+
         return new UserDto(
                 user.getUserId(),
                 user.getFirstName(),
@@ -181,7 +185,9 @@ public class UserServiceImpl implements UserService {
                 user.getEmail(),
                 user.getBio(),
                 user.getProfileImage() != null ? user.getProfileImage().getId() : null,
-                user.getRole() != null ? user.getRole().getName() : null
+                user.getRole() != null ? user.getRole().getName() : null,
+                averageRating != null ? averageRating : 0.0,
+                totalReviews != null ? totalReviews : 0L
 
         );
 

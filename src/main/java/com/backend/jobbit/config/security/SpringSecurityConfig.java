@@ -34,7 +34,8 @@ public class SpringSecurityConfig {
                                             "/api/job/**",
                                             "api/location",
                                             "/api/category",
-                                            "/api/images/**").permitAll()
+                                            "/api/images/**",
+                                            "/api/reviews/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().permitAll()
                 )

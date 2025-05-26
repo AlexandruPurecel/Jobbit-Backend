@@ -2,24 +2,17 @@ package com.backend.jobbit.dto.userDto;
 
 import lombok.*;
 
-
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
-
+public class UserReviewStatsDto {
     private Long userId;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String bio;
-    private Long profilePictureId;
-    private String roleName;
     private Double averageRating;
     private Long totalReviews;
-
-
-
+    private Long fiveStars;
+    private Long fourStars;
+    private Long threeStars;
+    private Long twoStars;
+    private Long oneStar;
 }

@@ -36,7 +36,6 @@ public class NotificationServiceImpl implements NotificationService{
         Notification saved = notificationRepo.save(notification);
         NotificationDto dto = convertToDto(saved);
 
-        // Send real-time notification via WebSocket
         messagingTemplate.convertAndSendToUser(
                 userId.toString(),
                 "/notifications",

@@ -64,10 +64,10 @@ public class MessageService {
                 sender.getFirstName(), sender.getLastName());
 
         notificationService.createNotification(
-                recipientId,                    // Who gets the notification
-                "MESSAGE",                      // Type of notification
-                notificationContent,            // What the notification says
-                savedMessage.getId()            // Link to this message
+                recipientId,
+                "MESSAGE",
+                notificationContent,
+                savedMessage.getId()
         );
 
 

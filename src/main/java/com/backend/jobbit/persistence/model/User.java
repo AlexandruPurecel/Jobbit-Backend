@@ -1,6 +1,7 @@
 package com.backend.jobbit.persistence.model;
 
 import com.backend.jobbit.persistence.ImageData;
+import com.backend.jobbit.persistence.Review;
 import com.backend.jobbit.persistence.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -47,5 +48,11 @@ public class User {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private Role role;
+
+    @OneToMany(mappedBy = "reviewedUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviewsReceived = new ArrayList<>();
+
+    @OneToMany(mappedBy = "reviewer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviewsWritten = new ArrayList<>();
 
 }
