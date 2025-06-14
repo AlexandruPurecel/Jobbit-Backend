@@ -40,7 +40,8 @@ public class JobController {
         return new ResponseEntity<>(jobs, HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
+
+    @PutMapping("update/{id}")
     public ResponseEntity<?> updateJob(@PathVariable Long id, @RequestBody JobDto jobDto,
                                        @RequestHeader("Authorization") String token) {
         try {
@@ -68,7 +69,7 @@ public class JobController {
     }
 
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("delete/{id}")
     public ResponseEntity<Void> deleteJob(@PathVariable Long id) {
         jobService.deleteJob(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

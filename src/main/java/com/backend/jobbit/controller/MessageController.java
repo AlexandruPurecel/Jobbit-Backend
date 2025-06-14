@@ -29,7 +29,7 @@ public class MessageController {
             @RequestHeader("Authorization") String authHeader,
             @RequestBody Map<String, Object> payload) {
 
-        String token = authHeader.substring(7); // Remove "Bearer " prefix
+        String token = authHeader.substring(7);
 
         if (!jwtUtil.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

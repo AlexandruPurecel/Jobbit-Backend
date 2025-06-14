@@ -28,14 +28,15 @@ public class SpringSecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**",
-                                        "/api/user/new",
-                                            "/api/job",
-                                            "/api/job/**",
-                                            "api/location",
-                                            "/api/category",
-                                            "/api/images/**",
-                                            "/api/reviews/**").permitAll()
+                        .requestMatchers("/api/job/new",
+                                        "/api/job/update/**",
+                                        "/api/job/delete/**",
+                                        "/api/images/user/**",
+                                        "/api/images/job/**",
+                                        "/api/messages/**",
+                                        "/api/notifications/**",
+                                        "/api/reviews/**",
+                                        "/api/user/update").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().permitAll()
                 )
